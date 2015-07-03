@@ -1,6 +1,7 @@
 from spack import *
 import glob
 import os
+from subprocess import call
 
 class Scotch(Package):
     """Scotch is a software package for graph and mesh/hypergraph
@@ -16,15 +17,19 @@ class Scotch(Package):
 
     def patch(self):
         with working_dir('src/Make.inc'):
+            spec = self.spec
             makefiles = glob.glob('Makefile.inc.x86-64_pc_linux2*')
             filter_file(r'^CCS\s*=.*$', 'CCS = cc', *makefiles)
             filter_file(r'^CCD\s*=.*$', 'CCD = cc', *makefiles)
+            if spec.satisfies('%icc'):
+                call(["cp", "Makefile.inc.x86-64_pc_linux2.shlib", "Makefile.inc.x86-64_pc_linux2.shlib.icc"])
+                filter_file(r'^CLIBFLAGS\s*=.*$', 'CLIBFLAGS = -shared -fpic', *makefiles)
 
 
     def install(self, spec, prefix):
         # Currently support gcc and icc on x86_64 (maybe others with
         # vanilla makefile)
-        makefile = 'Make.inc/Makefile.inc.x86-64_pc_linux2'
+        makefile = 'Make.inc/Makefile.inc.x86-64_pc_linux2.shlib'
         if spec.satisfies('%icc'):
             makefile += '.icc'
 
@@ -37,4 +42,3 @@ class Scotch(Package):
         install_tree('lib', prefix.lib)
         install_tree('include', prefix.include)
         install_tree('man/man1', prefix.share_man1)
-
