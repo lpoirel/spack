@@ -179,8 +179,8 @@ class Maphys(Package):
         fflags = ''
         cflags = ''
         if spec.satisfies('+debug'):
-            fflags += ' -g -O2'
-            cflags += ' -g -O2'
+            fflags += ' -g3 -O0 -Wall -fbounds-check -fbacktrace'
+            cflags += ' -g3 -O0 -Wall -fbounds-check -fbacktrace'
         else:
             fflags += ' -O3'
             cflags += ' -O3'
